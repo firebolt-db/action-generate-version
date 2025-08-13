@@ -1,0 +1,44 @@
+name: Generate Version
+description: Automatic version generation based on semver versioning and conventional commit messages
+
+inputs:
+  changes:
+    description: 'Newline-separated list of commit messages since last release'
+    required: true
+  old-tag:
+    description: 'Previous semantic version tag (e.g., 1.0.1)'
+    required: true
+  prerelease-tag:
+    description: 'Tag for pre-release (e.g., alpha, beta, rc). Leave empty for stable release.'
+    required: false
+    default: ''
+  major-release:
+    description: 'Trigger a major release. Any non-empty value indicates major release.'
+    required: false
+    default: ''
+
+outputs:
+  new-tag:
+    description: 'Generated semantic version tag'
+    value: ${{ steps.generate_version.outputs.new_tag }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install semver
+      shell: bash
+        
+    - name: Generate version tag
+      id: generate_version
+      run: |
+        NEW_TAG=$(python3 ${{ github.action_path }}/scripts/generate_version_tag.py "${{ inputs.changes }}" "${{ inputs.old-tag }}" --prerelease_tag "${{ inputs.prerelease-tag }}" --major_release "${{ inputs.major-release }}")
+        echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+      shell: bash
