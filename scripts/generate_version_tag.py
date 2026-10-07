@@ -56,7 +56,7 @@ def main(changes: str, old_tag: str, prerelease_tag: str, major_release: bool):
             new_ver = ver.bump_minor() if enhancements else ver.bump_patch()
     if prerelease_tag:
         new_ver = new_ver.bump_prerelease(prerelease_tag)
-    print(new_ver)
+    print(semver.VersionInfo.parse(str(new_ver)))
 
 
 def parse_arguments() -> Tuple[str, str, str, bool]:

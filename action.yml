@@ -38,7 +38,13 @@ runs:
         
     - name: Generate version tag
       id: generate_version
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+        CHANGES: ${{ inputs.changes }}
+        OLD_TAG: ${{ inputs.old-tag }}
+        PRERELEASE_TAG: ${{ inputs.prerelease-tag }}
+        MAJOR_RELEASE: ${{ inputs.major-release }}
       run: |
-        NEW_TAG=$(python3 ${{ github.action_path }}/scripts/generate_version_tag.py "${{ inputs.changes }}" "${{ inputs.old-tag }}" --prerelease_tag "${{ inputs.prerelease-tag }}" --major_release "${{ inputs.major-release }}")
-        echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+        NEW_TAG=$(python3 "$ACTION_PATH/scripts/generate_version_tag.py" --prerelease_tag="$PRERELEASE_TAG" --major_release="$MAJOR_RELEASE" -- "$CHANGES" "$OLD_TAG")
+        printf 'new_tag=%s\n' "$NEW_TAG" >> "$GITHUB_OUTPUT"
       shell: bash
