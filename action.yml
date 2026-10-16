@@ -26,7 +26,7 @@ runs:
   using: "composite"
   steps:
     - name: Set up Python 3.14
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
       with:
         python-version: '3.14'
     
@@ -38,7 +38,16 @@ runs:
         
     - name: Generate version tag
       id: generate_version
+      # Inputs are passed via env so commit subjects (e.g. PR titles containing
+      # `$(...)` or backticks) are treated as data, not as shell code.
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+        CHANGES: ${{ inputs.changes }}
+        OLD_TAG: ${{ inputs.old-tag }}
+        PRERELEASE_TAG: ${{ inputs.prerelease-tag }}
+        MAJOR_RELEASE: ${{ inputs.major-release }}
       run: |
-        NEW_TAG=$(python3 ${{ github.action_path }}/scripts/generate_version_tag.py "${{ inputs.changes }}" "${{ inputs.old-tag }}" --prerelease_tag "${{ inputs.prerelease-tag }}" --major_release "${{ inputs.major-release }}")
-        echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+        # `--opt=value` and `--` keep values that start with "-" from being read as options.
+        NEW_TAG=$(python3 "$ACTION_PATH/scripts/generate_version_tag.py" --prerelease_tag="$PRERELEASE_TAG" --major_release="$MAJOR_RELEASE" -- "$CHANGES" "$OLD_TAG")
+        printf 'new_tag=%s\n' "$NEW_TAG" >> "$GITHUB_OUTPUT"
       shell: bash
