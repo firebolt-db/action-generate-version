@@ -47,6 +47,7 @@ runs:
         PRERELEASE_TAG: ${{ inputs.prerelease-tag }}
         MAJOR_RELEASE: ${{ inputs.major-release }}
       run: |
-        NEW_TAG=$(python3 "$ACTION_PATH/scripts/generate_version_tag.py" "$CHANGES" "$OLD_TAG" --prerelease_tag "$PRERELEASE_TAG" --major_release "$MAJOR_RELEASE")
-        echo "new_tag=$NEW_TAG" >> "$GITHUB_OUTPUT"
+        # `--opt=value` and `--` keep values that start with "-" from being read as options.
+        NEW_TAG=$(python3 "$ACTION_PATH/scripts/generate_version_tag.py" --prerelease_tag="$PRERELEASE_TAG" --major_release="$MAJOR_RELEASE" -- "$CHANGES" "$OLD_TAG")
+        printf 'new_tag=%s\n' "$NEW_TAG" >> "$GITHUB_OUTPUT"
       shell: bash
